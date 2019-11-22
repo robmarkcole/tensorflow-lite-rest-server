@@ -3,4 +3,4 @@ Expose tensorflow-lite models via a rest API
 
 Equivalent of https://github.com/robmarkcole/coral-pi-rest-server but not requiring Coral hardware
 
-TLDR: requires docker host or raspberry pi
+Requires raspberry pi 4
