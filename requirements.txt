@@ -1,0 +1,3 @@
+Flask
+#Pillow # manual install
+#numpy # manual install
