@@ -12,6 +12,8 @@ We require `.tflite` model files. Git clone https://github.com/google-coral/edge
 ```
 $ python3 tflite-server.py
 ```
+You can check that the app is running by visiting `http://pi_ip:5000/` from any machine, where `pi_ip` is the ip address of the rasberry pi (`localhost` for requests from the pi itself). 
+
 Submit a request via cURL:
 ```
 $ curl -X POST -F image=@images/people_car.jpg 'http://localhost:5000/v1/vision/detection'
