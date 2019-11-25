@@ -19,6 +19,9 @@ Submit a request via cURL:
 $ curl -X POST -F image=@images/people_car.jpg 'http://localhost:5000/v1/vision/detection'
 ```
 
+## Summary
+Mobilenet v1 is a classification model it is working fine. V2 are object (COCO) and face but I do not know how to interpret the outputs of the model.
+
 ## Development
 I am developing on a pi4 using VScode remote over SSH from my Mac. Install the dev requirements: `$ pip3 install -r requirements-dev.txt`. Sort requirements with `$ /home/pi/.local/bin/isort tflite-server.py`. Unfortunately appears black is not supported on pi4 yet.
 
