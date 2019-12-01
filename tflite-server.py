@@ -71,13 +71,13 @@ def predict():
                 box = (y_min, x_min, y_max, x_max)
 
                 single_object['name'] = coco_labels[int(classes[i])]
-                single_object['score'] = scores[i]
-                single_object['box'] = box
+                #single_object['score'] = scores[i]
+                #single_object['box'] = box
                 objects.append(single_object)
 
         data['objects'] = objects
         data["success"] = True
-        return flask.jsonify(str(data))
+        return flask.jsonify(data)
 
 
 if __name__ == "__main__":
