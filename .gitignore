@@ -22,3 +22,6 @@ bin-release/
 mobilenet*
 *.log
 
+.vscode*
+__pycache__*
+.ipynb_checkpoints*
