@@ -1,6 +1,7 @@
 from PIL import ImageDraw
 from typing import Tuple
 
+
 def draw_box(
     draw: ImageDraw,
     box: Tuple[float, float, float, float],
