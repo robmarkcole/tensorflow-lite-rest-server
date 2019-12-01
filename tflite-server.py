@@ -9,7 +9,7 @@ import logging
 
 import flask
 import tflite_runtime.interpreter as tflite
-from PIL import Image, ImageDraw
+from PIL import Image
 from helpers import read_coco_labels
 
 app = flask.Flask(__name__)
@@ -54,28 +54,24 @@ def predict():
         classes = interpreter.get_tensor(output_details[1]['index'])[0] # Class index of detected objects
         scores = interpreter.get_tensor(output_details[2]['index'])[0] # Confidence of detected objects
 
-        
-        draw = ImageDraw.Draw(image)
-        img_width = image.size[0]
-        img_height = image.size[1]
-
         objects = []
-
         for i in range(len(scores)):
             if ((scores[i] > CONFIDENCE_THRESHOLD) and (scores[i] <= 1.0)):
                 single_object = {}
-                y_min = boxes[i][0]
-                x_min = boxes[i][1]
-                y_max = boxes[i][2]
-                x_max = boxes[i][3]
+                y_min = float(boxes[i][0])
+                x_min = float(boxes[i][1])
+                y_max = float(boxes[i][2])
+                x_max = float(boxes[i][3])
                 box = (y_min, x_min, y_max, x_max)
 
                 single_object['name'] = coco_labels[int(classes[i])]
-                #single_object['score'] = scores[i]
-                #single_object['box'] = box
+                single_object['score'] = float(scores[i])
+                single_object['box'] = box
                 objects.append(single_object)
 
-        data['objects'] = objects
+        data["objects"] = objects
+        data["image_width"] = image.size[0]
+        data["image_height"] = image.size[1]
         data["success"] = True
         return flask.jsonify(data)
 
