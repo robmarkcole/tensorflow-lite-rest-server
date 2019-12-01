@@ -21,3 +21,4 @@ bin-release/
 *.tgz
 mobilenet*
 *.log
+
