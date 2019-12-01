@@ -25,9 +25,14 @@ input_width =  None
 ROOT_URL = "/v1/object/detection"
 
 
-def load_labels(filename):
-  with open(filename, 'r') as f:
-    return [line.strip() for line in f.readlines()]
+def ReadLabelFile(file_path):
+    with open(file_path, "r", encoding="utf-8") as f:
+        lines = f.readlines()
+        ret = {}
+        for line in lines:
+            pair = line.strip().split(maxsplit=1)
+            ret[int(pair[0])] = pair[1].strip()
+    return ret
 
 @app.route("/")
 def info():
@@ -113,5 +118,5 @@ if __name__ == "__main__":
 
 
     print("\n Loaded model : {}".format(model_file))
-    labels = load_labels(labels_file)
+    labels = ReadLabelFile(labels_file)
     app.run(host="0.0.0.0", debug=True, port=args.port)
