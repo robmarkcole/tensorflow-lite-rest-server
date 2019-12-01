@@ -1,11 +1,13 @@
 # tensorflow-lite-rest-server
-Expose tensorflow-lite models via a rest API. Equivalent of https://github.com/robmarkcole/coral-pi-rest-server but not requiring Coral hardware. Requires raspberry pi 4 (TBC)
+Expose tensorflow-lite models via a rest API. Currently object detection is supported.
+
+Equivalent of https://github.com/robmarkcole/coral-pi-rest-server but not requiring Coral hardware. Requires raspberry pi 4 (TBC)
 
 ## Setup
 Manually install pip3, numpy, pillow then tensorflow-lite [as per these instructions](https://www.tensorflow.org/lite/guide/python). Then `$ pip3 install -r requirements.txt`
 
 ## Models
-We require `.tflite` model files. Git clone https://github.com/google-coral/edgetpu and all models are in `edgetpu/test_data/`. On my machine the absolute path to this folder is `/home/pi/github/edgetpu/test_data/`
+We are using `.tflite` model files from https://github.com/google-coral/edgetpu which for convenience are in this repo.
 
 ## Server
 #Start the server:
