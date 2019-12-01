@@ -16,7 +16,7 @@ You can check that the app is running by visiting `http://pi_ip:5000/` from any 
 
 Submit a request via cURL:
 ```
-$ curl -X POST -F image=@images/people_car.jpg 'http://localhost:5000/v1/vision/detection'
+$ curl -X POST -F image=@images/people_car.jpg 'http://localhost:5000/v1/object/detection'
 ```
 
 ## Development
