@@ -1,10 +1,10 @@
 # tensorflow-lite-rest-server
-Expose tensorflow-lite models via a rest API. Currently object detection is supported.
+Expose tensorflow-lite models via a rest API, and currently object detection is supported. Can be hosted on any of the common platforms listed [here](https://www.tensorflow.org/lite/guide/python), including RPi, linux desktop, Mac and Windows.
 
 Equivalent of https://github.com/robmarkcole/coral-pi-rest-server but not requiring Coral hardware. Requires raspberry pi 4 (TBC)
 
 ## Setup
-Manually install pip3, numpy, pillow then tensorflow-lite [as per these instructions](https://www.tensorflow.org/lite/guide/python). Then `$ pip3 install -r requirements.txt`
+Note on an RPi (only) it is necessary to manually install pip3, numpy, pillow then tensorflow-lite [as per these instructions](https://www.tensorflow.org/lite/guide/python). Then `$ pip3 install -r requirements.txt`. 
 
 ## Models
 We are using `.tflite` model files from https://github.com/google-coral/edgetpu which for convenience are in this repo.
@@ -82,8 +82,3 @@ Which should return:
 
 ## Development
 I am developing on a pi4 using VScode remote over SSH from my Mac. Install the dev requirements: `$ pip3 install -r requirements-dev.txt`. Sort requirements with `$ /home/pi/.local/bin/isort tflite-server.py`. Unfortunately appears black is not supported on pi4 yet.
-
-## Jupyterlab
-I have installed jupyterlab on the pi to assist with prototyping - note you can use vscode to connect to jupyter on the pi but I have found that very slow so I just connect to the standard jupyterlab interface using the ssh approach below. 
-* `$ pip3 install jupyterlab `
-* [Connect from remote machine via SSH port forwarding](https://www.blopig.com/blog/2018/03/running-jupyter-notebook-on-a-remote-server-via-ssh/) -> first run  `jupyter notebook --generate-config` then set default password using `jupyter notebook password`. Can then run notebook or lab (`jupyter lab --port=9000 --no-browser &`) and connect with ssh: `ssh -N -f -L 9000:localhost:9000 pi@ip` and visit `http://localhost:9000`
