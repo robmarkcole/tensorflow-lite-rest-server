@@ -29,18 +29,32 @@ curl -X POST -F image=@tests/people_car.jpg 'http://localhost:5000/v1/vision/det
 ```
 Which should return:
 ```
-{'predictions': [
-   {'confidence': 0.93359375, 
-    'label': 'car', 
-    'x_max': 0.6453010439872742, 
-    'x_min': 0.31541913747787476, 
-    'y_max': 0.7257205843925476, 
-    'y_min': 0.25035059452056885},
+{
+  "predictions": [
+    {
+      "confidence": 0.93359375, 
+      "label": "car", 
+      "x_max": 619, 
+      "x_min": 302, 
+      "y_max": 348, 
+      "y_min": 120
+    }, 
+    {
+      "confidence": 0.7890625, 
+      "label": "person", 
+      "x_max": 363, 
+      "x_min": 275, 
+      "y_max": 323, 
+      "y_min": 126
+    },
 .
 .
 .
 'success': True}
 ```
+
+## Deepstack & Home Assistant
+This API can be used as a drop in replacement for [deepstack object detection](https://github.com/robmarkcole/HASS-Deepstack-object) in Home Assistant.
 
 ## Development
 I am developing on a mac/pi4 using VScode. Install the dev requirements: `$ pip3 install -r requirements-dev.txt`. Sort requirements with `$ /home/pi/.local/bin/isort tflite-server.py`. Unfortunately appears black is not supported on pi4 yet.
