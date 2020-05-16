@@ -46,6 +46,8 @@ def predict():
         image_file = flask.request.files["image"]
         image_bytes = image_file.read()
         image = Image.open(io.BytesIO(image_bytes))
+        image_width = image.size[0]
+        image_height = image.size[1]
         resized_image = image.resize((input_width, input_height))
 
         input_data = np.expand_dims(resized_image, axis=0)
@@ -68,10 +70,10 @@ def predict():
                 single_object = {}
                 single_object["label"] = coco_labels[int(classes[i])]
                 single_object["confidence"] = float(scores[i])
-                single_object["y_min"] = float(boxes[i][0])
-                single_object["x_min"] = float(boxes[i][1])
-                single_object["y_max"] = float(boxes[i][2])
-                single_object["x_max"] = float(boxes[i][3])
+                single_object["y_min"] = int(float(boxes[i][0]) * image_height)
+                single_object["x_min"] = int(float(boxes[i][1]) * image_width)
+                single_object["y_max"] = int(float(boxes[i][2]) * image_height)
+                single_object["x_max"] = int(float(boxes[i][3]) * image_width)
                 objects.append(single_object)
 
         data["predictions"] = objects
