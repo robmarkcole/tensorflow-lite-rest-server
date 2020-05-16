@@ -28,7 +28,7 @@ Post an image for processing via cURL:
 curl -X POST -F image=@tests/people_car.jpg 'http://localhost:5000/v1/vision/detection'
 ```
 Which should return:
-```json
+```
 {'predictions': [
    {'confidence': 0.93359375, 
     'label': 'car', 
