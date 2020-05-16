@@ -15,14 +15,14 @@ from helpers import read_coco_labels
 app = flask.Flask(__name__)
 
 LOGFORMAT = "%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s"
-logging.basicConfig(filename='tflite-server.log', level=logging.DEBUG, format=LOGFORMAT)
+logging.basicConfig(filename="tflite-server.log", level=logging.DEBUG, format=LOGFORMAT)
 
 interpreter = None
 coco_labels = None
 input_height = None
 input_width = None
 
-API_VERSION = 'v1'
+OBJ_DETECTION_URL = "/v1/vision/detection"
 MODEL = "models/mobilenet_ssd_v2_coco_quant_postprocess.tflite"
 LABELS = "labels/coco_labels.txt"
 CONFIDENCE_THRESHOLD = 0.3
@@ -30,11 +30,13 @@ CONFIDENCE_THRESHOLD = 0.3
 
 @app.route("/")
 def info():
-    info_str = "Flask app exposing tensorflow lite model: {} \n".format(MODEL.split('/')[-1])
+    info_str = "Flask app exposing tensorflow lite model: {} \n".format(
+        MODEL.split("/")[-1]
+    )
     return info_str
 
 
-@app.route(f"/{API_VERSION}/object/detection", methods=["POST"])
+@app.route(OBJ_DETECTION_URL, methods=["POST"])
 def predict():
     data = {"success": False}
     if not flask.request.method == "POST":
@@ -47,31 +49,32 @@ def predict():
         resized_image = image.resize((input_width, input_height))
 
         input_data = np.expand_dims(resized_image, axis=0)
-        interpreter.set_tensor(input_details[0]['index'], input_data)
+        interpreter.set_tensor(input_details[0]["index"], input_data)
 
         interpreter.invoke()
-        boxes = interpreter.get_tensor(output_details[0]['index'])[0] # Bounding box coordinates of detected objects
-        classes = interpreter.get_tensor(output_details[1]['index'])[0] # Class index of detected objects
-        scores = interpreter.get_tensor(output_details[2]['index'])[0] # Confidence of detected objects
+        boxes = interpreter.get_tensor(output_details[0]["index"])[
+            0
+        ]  # Bounding box coordinates of detected objects
+        classes = interpreter.get_tensor(output_details[1]["index"])[
+            0
+        ]  # Class index of detected objects
+        scores = interpreter.get_tensor(output_details[2]["index"])[
+            0
+        ]  # Confidence of detected objects
 
         objects = []
         for i in range(len(scores)):
-            if ((scores[i] > CONFIDENCE_THRESHOLD) and (scores[i] <= 1.0)):
+            if (scores[i] > CONFIDENCE_THRESHOLD) and (scores[i] <= 1.0):
                 single_object = {}
-                y_min = float(boxes[i][0])
-                x_min = float(boxes[i][1])
-                y_max = float(boxes[i][2])
-                x_max = float(boxes[i][3])
-                box = (y_min, x_min, y_max, x_max)
-
-                single_object['name'] = coco_labels[int(classes[i])]
-                single_object['score'] = float(scores[i])
-                single_object['box'] = box
+                single_object["label"] = coco_labels[int(classes[i])]
+                single_object["confidence"] = float(scores[i])
+                single_object["y_min"] = float(boxes[i][0])
+                single_object["x_min"] = float(boxes[i][1])
+                single_object["y_max"] = float(boxes[i][2])
+                single_object["x_max"] = float(boxes[i][3])
                 objects.append(single_object)
 
-        data["objects"] = objects
-        data["image_width"] = image.size[0]
-        data["image_height"] = image.size[1]
+        data["predictions"] = objects
         data["success"] = True
         return flask.jsonify(data)
 
@@ -85,8 +88,8 @@ if __name__ == "__main__":
     interpreter.allocate_tensors()
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
-    input_height = input_details[0]['shape'][1]
-    input_width = input_details[0]['shape'][2]
+    input_height = input_details[0]["shape"][1]
+    input_width = input_details[0]["shape"][2]
     coco_labels = read_coco_labels(LABELS)
 
     app.run(host="0.0.0.0", debug=True, port=args.port)

@@ -25,66 +25,21 @@ You can check that the app is running by visiting `http://ip:5000/` from any mac
 
 Post an image for processing via cURL:
 ```
-curl -X POST -F image=@images/people_car.jpg 'http://localhost:5000/v1/object/detection'
+curl -X POST -F image=@tests/people_car.jpg 'http://localhost:5000/v1/vision/detection'
 ```
 Which should return:
 ```json
-{
-  "image_height": 480, 
-  "image_width": 960, 
-  "objects": [
-    {
-      "box": [
-        0.25783607363700867, 
-        0.33058103919029236, 
-        0.7246008515357971, 
-        0.6428706645965576
-      ], 
-      "name": "car", 
-      "score": 0.953125
-    }, 
-    {
-      "box": [
-        0.28432977199554443, 
-        0.28714725375175476, 
-        0.6788091659545898, 
-        0.37872299551963806
-      ], 
-      "name": "person", 
-      "score": 0.73046875
-    }, 
-    {
-      "box": [
-        0.524590253829956, 
-        0.22533127665519714, 
-        0.8592637777328491, 
-        0.3502572476863861
-      ], 
-      "name": "bicycle", 
-      "score": 0.66015625
-    }, 
-    {
-      "box": [
-        0.2879002094268799, 
-        0.2565079927444458, 
-        0.6752387285232544, 
-        0.36057573556900024
-      ], 
-      "name": "person", 
-      "score": 0.58203125
-    }, 
-    {
-      "box": [
-        0.30700039863586426, 
-        0.871345043182373, 
-        0.8164434432983398, 
-        0.9612630605697632
-      ], 
-      "name": "person", 
-      "score": 0.33984375
-    }
-  ], 
-  "
+{'predictions': [
+   {'confidence': 0.93359375, 
+    'label': 'car', 
+    'x_max': 0.6453010439872742, 
+    'x_min': 0.31541913747787476, 
+    'y_max': 0.7257205843925476, 
+    'y_min': 0.25035059452056885},
+.
+.
+.
+'success': True}
 ```
 
 ## Development
