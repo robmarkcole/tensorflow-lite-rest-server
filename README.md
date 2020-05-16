@@ -1,10 +1,16 @@
 # tensorflow-lite-rest-server
 Expose tensorflow-lite models via a rest API, and currently object detection is supported. Can be hosted on any of the common platforms listed [here](https://www.tensorflow.org/lite/guide/python), including RPi, linux desktop, Mac and Windows.
 
-Equivalent of https://github.com/robmarkcole/coral-pi-rest-server but not requiring Coral hardware. Requires raspberry pi 4 (TBC)
-
 ## Setup
-Note on an RPi (only) it is necessary to manually install pip3, numpy, pillow then tensorflow-lite [as per these instructions](https://www.tensorflow.org/lite/guide/python). Then `$ pip3 install -r requirements.txt`. 
+In this process we create a venv, then install tensorflow-lite [as per these instructions](https://www.tensorflow.org/lite/guide/python) (platform specific wheels), and install the remaining requirements. Note on an RPi (only) it is necessary to manually install pip3, numpy, pillow. 
+
+All instructions for mac:
+```
+python3.7 -m venv venv
+source venv/bin/activate
+pip3 install https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp37-cp37m-macosx_10_14_x86_64.whl
+pip3 install -r requirements.txt
+```
 
 ## Models
 We are using `.tflite` model files from https://github.com/google-coral/edgetpu which for convenience are in this repo.
@@ -12,13 +18,13 @@ We are using `.tflite` model files from https://github.com/google-coral/edgetpu 
 ## Server
 #Start the server:
 ```
-$ python3 tflite-server.py
+python3 tflite-server.py
 ```
 You can check that the app is running by visiting `http://pi_ip:5000/` from any machine, where `pi_ip` is the ip address of the rasberry pi (`localhost` for requests from the pi itself). 
 
 Submit a request via cURL:
 ```
-$ curl -X POST -F image=@images/people_car.jpg 'http://localhost:5000/v1/object/detection'
+curl -X POST -F image=@images/people_car.jpg 'http://localhost:5000/v1/object/detection'
 ```
 Which should return:
 ```json
