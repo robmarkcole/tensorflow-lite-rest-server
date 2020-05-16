@@ -1,8 +1,8 @@
 # tensorflow-lite-rest-server
-Expose tensorflow-lite models via a rest API, and currently object detection is supported. Can be hosted on any of the common platforms listed [here](https://www.tensorflow.org/lite/guide/python), including RPi, linux desktop, Mac and Windows.
+Expose tensorflow-lite models via a rest API, and currently object detection is supported. Can be hosted on any of the common platforms including RPi, linux desktop, Mac and Windows.
 
 ## Setup
-In this process we create a venv, then install tensorflow-lite [as per these instructions](https://www.tensorflow.org/lite/guide/python) (platform specific wheels), and install the remaining requirements. Note on an RPi (only) it is necessary to manually install pip3, numpy, pillow. 
+In this process we create a virtual environment (venv), then install tensorflow-lite [as per these instructions](https://www.tensorflow.org/lite/guide/python) which is platform specific, and finally install the remaining requirements. Note on an RPi (only) it is necessary to manually install pip3, numpy, pillow.
 
 All instructions for mac:
 ```
@@ -15,14 +15,15 @@ pip3 install -r requirements.txt
 ## Models
 We are using `.tflite` model files from https://github.com/google-coral/edgetpu which for convenience are in this repo.
 
-## Server
-#Start the server:
+## Usage
+Start the server:
 ```
 python3 tflite-server.py
 ```
-You can check that the app is running by visiting `http://pi_ip:5000/` from any machine, where `pi_ip` is the ip address of the rasberry pi (`localhost` for requests from the pi itself). 
 
-Submit a request via cURL:
+You can check that the app is running by visiting `http://ip:5000/` from any machine, where `ip` is the ip address of the host (`localhost` if querying from the same machine).
+
+Post an image for processing via cURL:
 ```
 curl -X POST -F image=@images/people_car.jpg 'http://localhost:5000/v1/object/detection'
 ```
@@ -87,4 +88,4 @@ Which should return:
 ```
 
 ## Development
-I am developing on a pi4 using VScode remote over SSH from my Mac. Install the dev requirements: `$ pip3 install -r requirements-dev.txt`. Sort requirements with `$ /home/pi/.local/bin/isort tflite-server.py`. Unfortunately appears black is not supported on pi4 yet.
+I am developing on a mac/pi4 using VScode. Install the dev requirements: `$ pip3 install -r requirements-dev.txt`. Sort requirements with `$ /home/pi/.local/bin/isort tflite-server.py`. Unfortunately appears black is not supported on pi4 yet.
