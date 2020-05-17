@@ -13,7 +13,7 @@ pip3 install -r requirements.txt
 ```
 
 ## Models
-We are using `.tflite` model files from https://github.com/google-coral/edgetpu which for convenience are in this repo.
+Models are available [here](https://github.com/google-coral/edgetpu/tree/master/test_data) with a short description of the models [here](https://coral.ai/models/). For convenience are the `mobilenet_ssd_v2` model is included in this repo and used by default. This model can detect 90 types of object, with object labels listed in `labels/coco_labels.txt`
 
 ## Usage
 Start the server:

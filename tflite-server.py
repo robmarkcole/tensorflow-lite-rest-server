@@ -1,7 +1,6 @@
-# Start the server:
-# 	python3 tflite-server.py
-# Submit a request via cURL:
-# 	curl -X POST -F image=@people-car.jpg 'http://localhost:5000/v1/object/detection'
+"""
+Expose a tflite object detection model via a rest API.
+"""
 import argparse
 import numpy as np
 import io
@@ -25,7 +24,7 @@ input_width = None
 OBJ_DETECTION_URL = "/v1/vision/detection"
 MODEL = "models/mobilenet_ssd_v2_coco_quant_postprocess.tflite"
 LABELS = "labels/coco_labels.txt"
-CONFIDENCE_THRESHOLD = 0.3
+CONFIDENCE_THRESHOLD = 0.6
 
 
 @app.route("/")
