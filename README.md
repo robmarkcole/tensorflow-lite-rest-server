@@ -13,19 +13,19 @@ pip3 install -r requirements.txt
 ```
 
 ## Models
-Models are available [here](https://github.com/google-coral/edgetpu/tree/master/test_data) with a short description of the models [here](https://coral.ai/models/). For convenience are the `mobilenet_ssd_v2` model is included in this repo and used by default. This model can detect 90 types of object, with object labels listed in `labels/coco_labels.txt`
+For convenience a couple of models are included in this repo and used by default. A description of each model is included in its directory. Additional models are available [here](https://github.com/google-coral/edgetpu/tree/master/test_data)
 
 ## Usage
-Start the server:
+Start the server on port 80 (default is port 5000):
 ```
-python3 tflite-server.py
+(venv) $ python3 tflite-server.py --port 80
 ```
 
 You can check that the app is running by visiting `http://ip:5000/` from any machine, where `ip` is the ip address of the host (`localhost` if querying from the same machine).
 
 Post an image for processing via cURL:
 ```
-curl -X POST -F image=@tests/people_car.jpg 'http://localhost:5000/v1/vision/detection'
+curl -X POST -F image=@tests/people_car.jpg 'http://localhost:80/v1/vision/detection'
 ```
 Which should return:
 ```
@@ -57,4 +57,12 @@ Which should return:
 This API can be used as a drop in replacement for [deepstack object detection](https://github.com/robmarkcole/HASS-Deepstack-object) in Home Assistant.
 
 ## Development
-I am developing on a mac/pi4 using VScode. Install the dev requirements: `$ pip3 install -r requirements-dev.txt`. Sort requirements with `$ /home/pi/.local/bin/isort tflite-server.py`. Unfortunately appears black is not supported on pi4 yet.
+I am developing on a mac/pi4 using VScode. On mac use a venv, on pi install system wide.
+
+* First time only, create venv: `python3.7 -m venv venv`
+* Activate venv: `source venv/bin/activate`
+* Install the dev requirements: `pip3 install -r requirements.txt` & `pip3 install -r requirements-dev.txt`
+* Sort requirements: `venv/bin/isort tflite-server.py`
+* Black format: `venv/bin/black tflite-server.py`
+
+Unfortunately appears black is not supported on pi4 yet.

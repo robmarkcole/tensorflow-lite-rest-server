@@ -1,5 +1,5 @@
 """
-Expose a tflite object detection model via a rest API.
+Expose a tflite models via a rest API.
 """
 import argparse
 import numpy as np
@@ -16,23 +16,21 @@ app = flask.Flask(__name__)
 LOGFORMAT = "%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s"
 logging.basicConfig(filename="tflite-server.log", level=logging.DEBUG, format=LOGFORMAT)
 
-interpreter = None
+obj_interpreter = None
 coco_labels = None
 input_height = None
 input_width = None
 
 OBJ_DETECTION_URL = "/v1/vision/detection"
-MODEL = "models/mobilenet_ssd_v2_coco_quant_postprocess.tflite"
-LABELS = "labels/coco_labels.txt"
-CONFIDENCE_THRESHOLD = 0.6
+OBJ_MODEL = "models/object_detection/mobilenet_ssd_v2_coco/mobilenet_ssd_v2_coco_quant_postprocess.tflite"
+OBJ_LABELS = "models/object_detection/mobilenet_ssd_v2_coco/coco_labels.txt"
 
 
 @app.route("/")
 def info():
-    info_str = "Flask app exposing tensorflow lite model: {} \n".format(
-        MODEL.split("/")[-1]
+    return (
+        f"""Flask app exposing object detection model: {OBJ_MODEL.split("/")[-1]} \n"""
     )
-    return info_str
 
 
 @app.route(OBJ_DETECTION_URL, methods=["POST"])
@@ -65,15 +63,14 @@ def predict():
 
         objects = []
         for i in range(len(scores)):
-            if (scores[i] > CONFIDENCE_THRESHOLD) and (scores[i] <= 1.0):
-                single_object = {}
-                single_object["label"] = coco_labels[int(classes[i])]
-                single_object["confidence"] = float(scores[i])
-                single_object["y_min"] = int(float(boxes[i][0]) * image_height)
-                single_object["x_min"] = int(float(boxes[i][1]) * image_width)
-                single_object["y_max"] = int(float(boxes[i][2]) * image_height)
-                single_object["x_max"] = int(float(boxes[i][3]) * image_width)
-                objects.append(single_object)
+            single_object = {}
+            single_object["label"] = coco_labels[int(classes[i])]
+            single_object["confidence"] = float(scores[i])
+            single_object["y_min"] = int(float(boxes[i][0]) * image_height)
+            single_object["x_min"] = int(float(boxes[i][1]) * image_width)
+            single_object["y_max"] = int(float(boxes[i][2]) * image_height)
+            single_object["x_max"] = int(float(boxes[i][3]) * image_width)
+            objects.append(single_object)
 
         data["predictions"] = objects
         data["success"] = True
