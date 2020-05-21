@@ -16,11 +16,6 @@ app = flask.Flask(__name__)
 LOGFORMAT = "%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s"
 logging.basicConfig(filename="tflite-server.log", level=logging.DEBUG, format=LOGFORMAT)
 
-obj_interpreter = None
-coco_labels = None
-input_height = None
-input_width = None
-
 OBJ_DETECTION_URL = "/v1/vision/detection"
 OBJ_MODEL = "models/object_detection/mobilenet_ssd_v2_coco/mobilenet_ssd_v2_coco_quant_postprocess.tflite"
 OBJ_LABELS = "models/object_detection/mobilenet_ssd_v2_coco/coco_labels.txt"
@@ -29,7 +24,7 @@ OBJ_LABELS = "models/object_detection/mobilenet_ssd_v2_coco/coco_labels.txt"
 @app.route("/")
 def info():
     return (
-        f"""Flask app exposing object detection model: {OBJ_MODEL.split("/")[-1]} \n"""
+        f"""Flask app exposing object detection model: {OBJ_MODEL.split("/")[-2]} \n"""
     )
 
 
@@ -45,26 +40,20 @@ def predict():
         image = Image.open(io.BytesIO(image_bytes))
         image_width = image.size[0]
         image_height = image.size[1]
-        resized_image = image.resize((input_width, input_height))
+        resized_image = image.resize((obj_input_width, obj_input_height))
 
         input_data = np.expand_dims(resized_image, axis=0)
-        interpreter.set_tensor(input_details[0]["index"], input_data)
+        obj_interpreter.set_tensor(obj_input_details[0]["index"], input_data)
 
-        interpreter.invoke()
-        boxes = interpreter.get_tensor(output_details[0]["index"])[
-            0
-        ]  # Bounding box coordinates of detected objects
-        classes = interpreter.get_tensor(output_details[1]["index"])[
-            0
-        ]  # Class index of detected objects
-        scores = interpreter.get_tensor(output_details[2]["index"])[
-            0
-        ]  # Confidence of detected objects
+        obj_interpreter.invoke()
+        boxes = obj_interpreter.get_tensor(obj_output_details[0]["index"])[0]
+        classes = obj_interpreter.get_tensor(obj_output_details[1]["index"])[0]
+        scores = obj_interpreter.get_tensor(obj_output_details[2]["index"])[0]
 
         objects = []
         for i in range(len(scores)):
             single_object = {}
-            single_object["label"] = coco_labels[int(classes[i])]
+            single_object["label"] = obj_labels[int(classes[i])]
             single_object["confidence"] = float(scores[i])
             single_object["y_min"] = int(float(boxes[i][0]) * image_height)
             single_object["x_min"] = int(float(boxes[i][1]) * image_width)
@@ -82,12 +71,12 @@ if __name__ == "__main__":
     parser.add_argument("--port", default=5000, type=int, help="port number")
     args = parser.parse_args()
 
-    interpreter = tflite.Interpreter(model_path=MODEL)
-    interpreter.allocate_tensors()
-    input_details = interpreter.get_input_details()
-    output_details = interpreter.get_output_details()
-    input_height = input_details[0]["shape"][1]
-    input_width = input_details[0]["shape"][2]
-    coco_labels = read_coco_labels(LABELS)
+    obj_interpreter = tflite.Interpreter(model_path=OBJ_MODEL)
+    obj_interpreter.allocate_tensors()
+    obj_input_details = obj_interpreter.get_input_details()
+    obj_output_details = obj_interpreter.get_output_details()
+    obj_input_height = obj_input_details[0]["shape"][1]
+    obj_input_width = obj_input_details[0]["shape"][2]
+    obj_labels = read_coco_labels(OBJ_LABELS)
 
     app.run(host="0.0.0.0", debug=True, port=args.port)
