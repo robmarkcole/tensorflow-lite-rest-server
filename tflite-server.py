@@ -2,13 +2,14 @@
 Expose a tflite object detection model via a rest API.
 """
 import argparse
-import numpy as np
 import io
 import logging
 
 import flask
+import numpy as np
 import tflite_runtime.interpreter as tflite
 from PIL import Image
+
 from helpers import read_coco_labels
 
 app = flask.Flask(__name__)

@@ -1,2 +1,4 @@
 isort
 requests
+black
+jupyter
