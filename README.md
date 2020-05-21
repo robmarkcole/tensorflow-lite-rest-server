@@ -64,5 +64,6 @@ I am developing on a mac/pi4 using VScode. On mac use a venv, on pi install syst
 * Install the dev requirements: `pip3 install -r requirements.txt` & `pip3 install -r requirements-dev.txt`
 * Sort requirements: `venv/bin/isort tflite-server.py`
 * Black format: `venv/bin/black tflite-server.py`
+* Run the `usage.ipynb` notebook: `venv/bin/jupyter notebook`
 
 Unfortunately appears black is not supported on pi4 yet.
