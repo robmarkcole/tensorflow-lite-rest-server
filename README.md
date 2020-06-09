@@ -16,16 +16,16 @@ pip3 install -r requirements.txt
 For convenience a couple of models are included in this repo and used by default. A description of each model is included in its directory. Additional models are available [here](https://github.com/google-coral/edgetpu/tree/master/test_data)
 
 ## Usage
-Start the server on port 80 (default is port 5000):
+Start the server on port 5000 (default is port 5000):
 ```
-(venv) $ python3 tflite-server.py --port 80
+(venv) $ python3 tflite-server.py --port 5000
 ```
 
 You can check that the app is running by visiting `http://ip:5000/` from any machine, where `ip` is the ip address of the host (`localhost` if querying from the same machine).
 
-Post an image for processing via cURL:
+Post an image to detecting objects via cURL:
 ```
-curl -X POST -F image=@tests/people_car.jpg 'http://localhost:80/v1/vision/detection'
+curl -X POST -F image=@tests/people_car.jpg 'http://localhost:5000/v1/vision/detection'
 ```
 Which should return:
 ```
@@ -53,8 +53,13 @@ Which should return:
 'success': True}
 ```
 
-## Deepstack & Home Assistant
-This API can be used as a drop in replacement for [deepstack object detection](https://github.com/robmarkcole/HASS-Deepstack-object) in Home Assistant.
+To detect faces:
+```
+curl -X POST -F image=@tests/faces.jpg 'http://localhost:5000/v1/vision/face'
+```
+
+## Deepstack, Home Assistant & UI
+This API can be used as a drop in replacement for [deepstack object detection](https://github.com/robmarkcole/HASS-Deepstack-object) in Home Assistant. I also created a UI for viewing the predictions of the object detection model [here](https://github.com/robmarkcole/deepstack-ui).
 
 ## Development
 I am developing on a mac/pi4 using VScode. On mac use a venv, on pi install system wide.
