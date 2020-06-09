@@ -53,8 +53,8 @@ Which should return:
 'success': True}
 ```
 
-## Deepstack & Home Assistant
-This API can be used as a drop in replacement for [deepstack object detection](https://github.com/robmarkcole/HASS-Deepstack-object) in Home Assistant.
+## Deepstack, Home Assistant & UI
+This API can be used as a drop in replacement for [deepstack object detection](https://github.com/robmarkcole/HASS-Deepstack-object) in Home Assistant. I also created a UI for viewing the predictions of the object detection model [here](https://github.com/robmarkcole/deepstack-ui).
 
 ## Development
 I am developing on a mac/pi4 using VScode. On mac use a venv, on pi install system wide.
