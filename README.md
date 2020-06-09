@@ -16,16 +16,16 @@ pip3 install -r requirements.txt
 For convenience a couple of models are included in this repo and used by default. A description of each model is included in its directory. Additional models are available [here](https://github.com/google-coral/edgetpu/tree/master/test_data)
 
 ## Usage
-Start the server on port 80 (default is port 5000):
+Start the server on port 5000 (default is port 5000):
 ```
-(venv) $ python3 tflite-server.py --port 80
+(venv) $ python3 tflite-server.py --port 5000
 ```
 
 You can check that the app is running by visiting `http://ip:5000/` from any machine, where `ip` is the ip address of the host (`localhost` if querying from the same machine).
 
 Post an image for processing via cURL:
 ```
-curl -X POST -F image=@tests/people_car.jpg 'http://localhost:80/v1/vision/detection'
+curl -X POST -F image=@tests/people_car.jpg 'http://localhost:5000/v1/vision/detection'
 ```
 Which should return:
 ```
