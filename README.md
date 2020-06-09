@@ -23,7 +23,7 @@ Start the server on port 5000 (default is port 5000):
 
 You can check that the app is running by visiting `http://ip:5000/` from any machine, where `ip` is the ip address of the host (`localhost` if querying from the same machine).
 
-Post an image for processing via cURL:
+Post an image to detecting objects via cURL:
 ```
 curl -X POST -F image=@tests/people_car.jpg 'http://localhost:5000/v1/vision/detection'
 ```
@@ -51,6 +51,11 @@ Which should return:
 .
 .
 'success': True}
+```
+
+To detect faces:
+```
+curl -X POST -F image=@tests/faces.jpg 'http://localhost:5000/v1/vision/face'
 ```
 
 ## Deepstack, Home Assistant & UI

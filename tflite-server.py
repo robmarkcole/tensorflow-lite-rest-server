@@ -4,6 +4,7 @@ Expose a tflite models via a rest API.
 import argparse
 import io
 import logging
+import sys
 
 import flask
 import numpy as np
@@ -14,8 +15,15 @@ from helpers import read_coco_labels
 
 app = flask.Flask(__name__)
 
-LOGFORMAT = "%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s"
-logging.basicConfig(filename="tflite-server.log", level=logging.DEBUG, format=LOGFORMAT)
+LOGFORMAT = "%(asctime)s %(levelname)s %(name)s : %(message)s"
+logging.basicConfig(
+    # filename="tflite-server.log", # select filename or stream
+    stream=sys.stdout,
+    level=logging.DEBUG,
+    format=LOGFORMAT,
+)
+
+MIN_CONFIDENCE = 0.1  # The absolute lowest confidence for a detection.
 
 FACE_DETECTION_URL = "/v1/vision/face"
 FACE_MODEL = "models/face_detection/mobilenet_ssd_v2_face/mobilenet_ssd_v2_face_quant_postprocess.tflite"
@@ -27,14 +35,21 @@ OBJ_LABELS = "models/object_detection/mobilenet_ssd_v2_coco/coco_labels.txt"
 
 @app.route("/")
 def info():
-    return (
-        f"""Flask app exposing object detection model: {OBJ_MODEL.split("/")[-2]} \n"""
+    return f"""
+        Object detection model: {OBJ_MODEL.split("/")[-2]} \n
+        Face detection model: {FACE_MODEL.split("/")[-2]} \n
+        """.replace(
+        "\n", "<br>"
     )
 
 
 @app.route(FACE_DETECTION_URL, methods=["POST"])
-def predict():
+def predict_face():
     data = {"success": False}
+    print(
+        f"Received request from {flask.request.remote_addr} on {FACE_DETECTION_URL}",
+        file=sys.stderr,
+    )
     if not flask.request.method == "POST":
         return
 
@@ -54,16 +69,22 @@ def predict():
         # Process image and get predictions
         face_interpreter.invoke()
         boxes = face_interpreter.get_tensor(face_output_details[0]["index"])[0]
+        classes = face_interpreter.get_tensor(face_output_details[1]["index"])[0]
         scores = face_interpreter.get_tensor(face_output_details[2]["index"])[0]
 
         faces = []
         for i in range(len(scores)):
+            if not classes[i] == 0:  # Face
+                continue
             single_face = {}
             single_face["confidence"] = float(scores[i])
+            single_face["label"] = "face"
             single_face["y_min"] = int(float(boxes[i][0]) * image_height)
             single_face["x_min"] = int(float(boxes[i][1]) * image_width)
             single_face["y_max"] = int(float(boxes[i][2]) * image_height)
             single_face["x_max"] = int(float(boxes[i][3]) * image_width)
+            if single_face["confidence"] < MIN_CONFIDENCE:
+                continue
             faces.append(single_face)
 
         data["predictions"] = faces
@@ -72,8 +93,12 @@ def predict():
 
 
 @app.route(OBJ_DETECTION_URL, methods=["POST"])
-def predict():
+def predict_object():
     data = {"success": False}
+    print(
+        f"Received request from {flask.request.remote_addr} on {OBJ_DETECTION_URL}",
+        file=sys.stderr,
+    )
     if not flask.request.method == "POST":
         return
 
@@ -105,6 +130,9 @@ def predict():
             single_object["x_min"] = int(float(boxes[i][1]) * image_width)
             single_object["y_max"] = int(float(boxes[i][2]) * image_height)
             single_object["x_max"] = int(float(boxes[i][3]) * image_width)
+
+            if single_object["confidence"] < MIN_CONFIDENCE:
+                continue
             objects.append(single_object)
 
         data["predictions"] = objects
