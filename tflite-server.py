@@ -17,6 +17,9 @@ app = flask.Flask(__name__)
 LOGFORMAT = "%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s"
 logging.basicConfig(filename="tflite-server.log", level=logging.DEBUG, format=LOGFORMAT)
 
+FACE_DETECTION_URL = "/v1/vision/face"
+FACE_MODEL = "models/face_detection/mobilenet_ssd_v2_face/mobilenet_ssd_v2_face_quant_postprocess.tflite"
+
 OBJ_DETECTION_URL = "/v1/vision/detection"
 OBJ_MODEL = "models/object_detection/mobilenet_ssd_v2_coco/mobilenet_ssd_v2_coco_quant_postprocess.tflite"
 OBJ_LABELS = "models/object_detection/mobilenet_ssd_v2_coco/coco_labels.txt"
@@ -36,16 +39,19 @@ def predict():
         return
 
     if flask.request.files.get("image"):
+        # Open image and get bytes and size
         image_file = flask.request.files["image"]
         image_bytes = image_file.read()
         image = Image.open(io.BytesIO(image_bytes))
         image_width = image.size[0]
         image_height = image.size[1]
-        resized_image = image.resize((obj_input_width, obj_input_height))
 
+        # Format data and send to interpreter
+        resized_image = image.resize((obj_input_width, obj_input_height))
         input_data = np.expand_dims(resized_image, axis=0)
         obj_interpreter.set_tensor(obj_input_details[0]["index"], input_data)
 
+        # Process image and get predictions
         obj_interpreter.invoke()
         boxes = obj_interpreter.get_tensor(obj_output_details[0]["index"])[0]
         classes = obj_interpreter.get_tensor(obj_output_details[1]["index"])[0]
@@ -72,6 +78,7 @@ if __name__ == "__main__":
     parser.add_argument("--port", default=5000, type=int, help="port number")
     args = parser.parse_args()
 
+    # Setup object detection
     obj_interpreter = tflite.Interpreter(model_path=OBJ_MODEL)
     obj_interpreter.allocate_tensors()
     obj_input_details = obj_interpreter.get_input_details()
