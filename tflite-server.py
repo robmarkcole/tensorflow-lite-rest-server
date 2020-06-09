@@ -78,7 +78,7 @@ def predict_face():
                 continue
             single_face = {}
             single_face["confidence"] = float(scores[i])
-            single_face["label"] = "face"
+            single_face["userid"] = "unknown"
             single_face["y_min"] = int(float(boxes[i][0]) * image_height)
             single_face["x_min"] = int(float(boxes[i][1]) * image_width)
             single_face["y_max"] = int(float(boxes[i][2]) * image_height)
