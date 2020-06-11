@@ -11,7 +11,7 @@ import numpy as np
 import tflite_runtime.interpreter as tflite
 from PIL import Image
 
-from helpers import read_coco_labels
+from helpers import read_labels
 
 app = flask.Flask(__name__)
 
@@ -31,6 +31,10 @@ FACE_MODEL = "models/face_detection/mobilenet_ssd_v2_face/mobilenet_ssd_v2_face_
 OBJ_DETECTION_URL = "/v1/vision/detection"
 OBJ_MODEL = "models/object_detection/mobilenet_ssd_v2_coco/mobilenet_ssd_v2_coco_quant_postprocess.tflite"
 OBJ_LABELS = "models/object_detection/mobilenet_ssd_v2_coco/coco_labels.txt"
+
+SCENE_URL = "/v1/vision/scene"
+SCENE_MODEL = "models/classification/dogs-vs-cats/model.tflite"
+SCENE_LABEL = "models/classification/dogs-vs-cats/labels.txt"
 
 
 @app.route("/")
@@ -69,7 +73,9 @@ def predict_face():
         # Process image and get predictions
         face_interpreter.invoke()
         boxes = face_interpreter.get_tensor(face_output_details[0]["index"])[0]
-        classes = face_interpreter.get_tensor(face_output_details[1]["index"])[0]
+        classes = face_interpreter.get_tensor(face_output_details[1]["index"])[
+            0
+        ]
         scores = face_interpreter.get_tensor(face_output_details[2]["index"])[0]
 
         faces = []
@@ -141,7 +147,9 @@ def predict_object():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Flask app exposing tflite models")
+    parser = argparse.ArgumentParser(
+        description="Flask app exposing tflite models"
+    )
     parser.add_argument("--port", default=5000, type=int, help="port number")
     args = parser.parse_args()
 
@@ -152,14 +160,22 @@ if __name__ == "__main__":
     obj_output_details = obj_interpreter.get_output_details()
     obj_input_height = obj_input_details[0]["shape"][1]
     obj_input_width = obj_input_details[0]["shape"][2]
-    obj_labels = read_coco_labels(OBJ_LABELS)
+    obj_labels = read_labels(OBJ_LABELS)
 
     # Setup face detection
     face_interpreter = tflite.Interpreter(model_path=FACE_MODEL)
     face_interpreter.allocate_tensors()
     face_input_details = face_interpreter.get_input_details()
     face_output_details = face_interpreter.get_output_details()
-    face_input_height = 320
-    face_input_width = 320
+    face_input_height = face_input_details[0]["shape"][1]  # 320
+    face_input_width = face_input_details[0]["shape"][2]  # 320
+
+    # Setup face detection
+    scene_interpreter = tflite.Interpreter(model_path=FACE_MODEL)
+    scene_interpreter.allocate_tensors()
+    scene_input_details = scene_interpreter.get_input_details()
+    scene_output_details = scene_interpreter.get_output_details()
+    scene_input_height = scene_input_details[0]["shape"][1]
+    scene_input_width = scene_input_details[0]["shape"][2]
 
     app.run(host="0.0.0.0", debug=True, port=args.port)

@@ -1,5 +1,5 @@
 # tensorflow-lite-rest-server
-Expose tensorflow-lite models via a rest API, and currently object detection is supported. Can be hosted on any of the common platforms including RPi, linux desktop, Mac and Windows.
+Expose tensorflow-lite models via a rest API, and currently object, face & scene detection is supported. Can be hosted on any of the common platforms including RPi, linux desktop, Mac and Windows.
 
 ## Setup
 In this process we create a virtual environment (venv), then install tensorflow-lite [as per these instructions](https://www.tensorflow.org/lite/guide/python) which is platform specific, and finally install the remaining requirements. Note on an RPi (only) it is necessary to manually install pip3, numpy, pillow.
@@ -56,6 +56,13 @@ Which should return:
 To detect faces:
 ```
 curl -X POST -F image=@tests/faces.jpg 'http://localhost:5000/v1/vision/face'
+```
+
+To run the scene:
+```
+curl -X POST -F image=@tests/cat.jpg 'http://localhost:5000/v1/vision/scene'
+or
+curl -X POST -F image=@tests/dog.jpg 'http://localhost:5000/v1/vision/scene'
 ```
 
 ## Deepstack, Home Assistant & UI

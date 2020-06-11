@@ -3,9 +3,9 @@ Helper utilities.
 """
 
 
-def read_coco_labels(file_path):
+def read_labels(file_path):
     """
-    Helper for loading coco_labels.txt
+    Helper for loading labels.txt
     """
     with open(file_path, "r", encoding="utf-8") as f:
         lines = f.readlines()
