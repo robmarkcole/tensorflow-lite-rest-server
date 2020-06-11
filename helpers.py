@@ -1,9 +1,12 @@
-from PIL import ImageDraw
-from typing import Tuple
+"""
+Helper utilities.
+"""
+import numpy as np
 
-def read_coco_labels(file_path):
+
+def read_labels(file_path):
     """
-    Helper for loading coco_labels.txt
+    Helper for loading labels.txt
     """
     with open(file_path, "r", encoding="utf-8") as f:
         lines = f.readlines()
@@ -13,39 +16,24 @@ def read_coco_labels(file_path):
             ret[int(pair[0])] = pair[1].strip()
     return ret
 
-def draw_box(
-    draw: ImageDraw,
-    box: Tuple[float, float, float, float],
-    img_width: int,
-    img_height: int,
-    text: str = "",
-    color: Tuple[int, int, int] = (255, 255, 0),
-) -> None:
-    """
-    Draw a bounding box on and image.
-    The bounding box is defined by the tuple (y_min, x_min, y_max, x_max)
-    where the coordinates are floats in the range [0.0, 1.0] and
-    relative to the width and height of the image.
-    For example, if an image is 100 x 200 pixels (height x width) and the bounding
-    box is `(0.1, 0.2, 0.5, 0.9)`, the upper-left and bottom-right coordinates of
-    the bounding box will be `(40, 10)` to `(180, 50)` (in (x,y) coordinates).
-    """
 
-    line_width = 3
-    font_height = 8
-    y_min, x_min, y_max, x_max = box
-    (left, right, top, bottom) = (
-        x_min * img_width,
-        x_max * img_width,
-        y_min * img_height,
-        y_max * img_height,
-    )
-    draw.line(
-        [(left, top), (left, bottom), (right, bottom), (right, top), (left, top)],
-        width=line_width,
-        fill=color,
-    )
-    if text:
-        draw.text(
-            (left + line_width, abs(top - line_width - font_height)), text, fill=color
-        )
+def set_input_tensor(interpreter, image):
+    tensor_index = interpreter.get_input_details()[0]["index"]
+    input_tensor = interpreter.tensor(tensor_index)()[0]
+    input_tensor[:, :] = image
+
+
+def classify_image(interpreter, image, top_k=1):
+    """Returns a sorted array of classification results."""
+    set_input_tensor(interpreter, image)
+    interpreter.invoke()
+    output_details = interpreter.get_output_details()[0]
+    output = np.squeeze(interpreter.get_tensor(output_details["index"]))
+
+    # If the model is quantized (uint8 data), then dequantize the results
+    if output_details["dtype"] == np.uint8:
+        scale, zero_point = output_details["quantization"]
+        output = scale * (output - zero_point)
+
+    ordered = np.argpartition(-output, top_k)
+    return [(i, output[i]) for i in ordered[:top_k]]
