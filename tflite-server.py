@@ -11,7 +11,7 @@ import numpy as np
 import tflite_runtime.interpreter as tflite
 from PIL import Image
 
-from helpers import read_labels
+from helpers import read_labels, set_input_tensor, classify_image
 
 app = flask.Flask(__name__)
 
@@ -34,7 +34,7 @@ OBJ_LABELS = "models/object_detection/mobilenet_ssd_v2_coco/coco_labels.txt"
 
 SCENE_URL = "/v1/vision/scene"
 SCENE_MODEL = "models/classification/dogs-vs-cats/model.tflite"
-SCENE_LABEL = "models/classification/dogs-vs-cats/labels.txt"
+SCENE_LABELS = "models/classification/dogs-vs-cats/labels.txt"
 
 
 @app.route("/")
@@ -42,6 +42,7 @@ def info():
     return f"""
         Object detection model: {OBJ_MODEL.split("/")[-2]} \n
         Face detection model: {FACE_MODEL.split("/")[-2]} \n
+        Scene model: {SCENE_MODEL.split("/")[-2]} \n
         """.replace(
         "\n", "<br>"
     )
@@ -50,10 +51,6 @@ def info():
 @app.route(FACE_DETECTION_URL, methods=["POST"])
 def predict_face():
     data = {"success": False}
-    print(
-        f"Received request from {flask.request.remote_addr} on {FACE_DETECTION_URL}",
-        file=sys.stderr,
-    )
     if not flask.request.method == "POST":
         return
 
@@ -101,10 +98,6 @@ def predict_face():
 @app.route(OBJ_DETECTION_URL, methods=["POST"])
 def predict_object():
     data = {"success": False}
-    print(
-        f"Received request from {flask.request.remote_addr} on {OBJ_DETECTION_URL}",
-        file=sys.stderr,
-    )
     if not flask.request.method == "POST":
         return
 
@@ -146,6 +139,34 @@ def predict_object():
         return flask.jsonify(data)
 
 
+@app.route(SCENE_URL, methods=["POST"])
+def predict_scene():
+    data = {"success": False}
+    if not flask.request.method == "POST":
+        return
+
+    if flask.request.files.get("image"):
+        # Open image and get bytes and size
+        image_file = flask.request.files["image"]
+        image_bytes = image_file.read()
+        image = Image.open(io.BytesIO(image_bytes))  # A PIL image
+        # Format data and send to interpreter
+        resized_image = image.resize(
+            (scene_input_width, scene_input_height), Image.ANTIALIAS
+        )
+        results = classify_image(scene_interpreter, image=resized_image)
+
+        print(
+            f"results[0]: {results[0]}", file=sys.stderr,
+        )
+        label_id, prob = results[0]
+
+        data["label"] = scene_labels[label_id]
+        data["confidence"] = prob
+        data["success"] = True
+        return flask.jsonify(data)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Flask app exposing tflite models"
@@ -171,11 +192,12 @@ if __name__ == "__main__":
     face_input_width = face_input_details[0]["shape"][2]  # 320
 
     # Setup face detection
-    scene_interpreter = tflite.Interpreter(model_path=FACE_MODEL)
+    scene_interpreter = tflite.Interpreter(model_path=SCENE_MODEL)
     scene_interpreter.allocate_tensors()
     scene_input_details = scene_interpreter.get_input_details()
     scene_output_details = scene_interpreter.get_output_details()
     scene_input_height = scene_input_details[0]["shape"][1]
     scene_input_width = scene_input_details[0]["shape"][2]
+    scene_labels = read_labels(SCENE_LABELS)
 
     app.run(host="0.0.0.0", debug=True, port=args.port)
