@@ -13,7 +13,9 @@ pip3 install -r requirements.txt
 ```
 
 ## Models
-For convenience a couple of models are included in this repo and used by default. A description of each model is included in its directory. Additional models are available [here](https://github.com/google-coral/edgetpu/tree/master/test_data)
+For convenience a couple of models are included in this repo and used by default. A description of each model is included in its directory. Additional models are available [here](https://github.com/google-coral/edgetpu/tree/master/test_data).
+
+If you want to create custom models, there is the easy way,  and the longer but more flexible way. The easy way is to use [teachablemachine](https://teachablemachine.withgoogle.com/train/image), which I have done in this repo for the dogs-vs-cats model. This is limited to image classification but is very straightforward. The longer way allows you to use any neural network architecture to produce a tensorflow model, which you then convert to a tflite model. An example of this approch is described in [this article](https://towardsdatascience.com/inferences-from-a-tf-lite-model-transfer-learning-on-a-pre-trained-model-e16e7c5f0ee6), or jump straight [to the code](https://github.com/arshren/TFLite/blob/master/Transfer%20Learning%20with%20TFLite-Copy1.ipynb).
 
 ## Usage
 Start the server on port 5000 (default is port 5000):
