@@ -4,3 +4,6 @@
 * Input size: 224x224
 * Type: tensorflow lite quantized
 * Training time: 1 hour
+
+## Notebooks
+Also in this folder are notebooks which show both transfer and full training of a classification model, and export to tflite. Note that these notebooks take a long time to run, even on colab with GPU, expect the full training example to run for hours whilst transfer learning about 30 mins. Also I need to optimise the model compression, as my generated .tflite models are 80MB (full) and 40MB (quantized).
