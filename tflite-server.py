@@ -6,14 +6,14 @@ import io
 import logging
 import sys
 
-import flask
 import numpy as np
 import tflite_runtime.interpreter as tflite
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from PIL import Image
 
-from helpers import read_labels, set_input_tensor, classify_image
+from helpers import classify_image, read_labels, set_input_tensor
 
-app = flask.Flask(__name__)
+app = FastAPI()
 
 LOGFORMAT = "%(asctime)s %(levelname)s %(name)s : %(message)s"
 logging.basicConfig(
@@ -37,8 +37,8 @@ SCENE_MODEL = "models/classification/dogs-vs-cats/model.tflite"
 SCENE_LABELS = "models/classification/dogs-vs-cats/labels.txt"
 
 
-@app.route("/")
-def info():
+@app.get("/")
+async def info():
     return f"""
         Object detection model: {OBJ_MODEL.split("/")[-2]} \n
         Face detection model: {FACE_MODEL.split("/")[-2]} \n
@@ -48,17 +48,16 @@ def info():
     )
 
 
-@app.route(FACE_DETECTION_URL, methods=["POST"])
-def predict_face():
+@app.post(FACE_DETECTION_URL)
+async def predict_face():
     data = {"success": False}
-    if not flask.request.method == "POST":
-        return
-
-    if flask.request.files.get("image"):
-        # Open image and get bytes and size
-        image_file = flask.request.files["image"]
-        image_bytes = image_file.read()
-        image = Image.open(io.BytesIO(image_bytes))  # A PIL image
+    if file.content_type.startswith("image/") is False:
+        raise HTTPException(
+            status_code=400, detail=f"File '{file.filename}' is not an image."
+        )
+    try:
+        contents = await file.read()
+        image = Image.open(io.BytesIO(contents))  # A PIL image
         image_width = image.size[0]
         image_height = image.size[1]
 
@@ -92,20 +91,22 @@ def predict_face():
 
         data["predictions"] = faces
         data["success"] = True
-        return flask.jsonify(data)
+        return data
+    except:
+        e = sys.exc_info()[1]
+        raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.route(OBJ_DETECTION_URL, methods=["POST"])
-def predict_object():
+@app.post(OBJ_DETECTION_URL)
+async def predict_object():
     data = {"success": False}
-    if not flask.request.method == "POST":
-        return
-
-    if flask.request.files.get("image"):
-        # Open image and get bytes and size
-        image_file = flask.request.files["image"]
-        image_bytes = image_file.read()
-        image = Image.open(io.BytesIO(image_bytes))  # A PIL image
+    if file.content_type.startswith("image/") is False:
+        raise HTTPException(
+            status_code=400, detail=f"File '{file.filename}' is not an image."
+        )
+    try:
+        contents = await file.read()
+        image = Image.open(io.BytesIO(contents))  # A PIL image
         image_width = image.size[0]
         image_height = image.size[1]
 
@@ -136,20 +137,22 @@ def predict_object():
 
         data["predictions"] = objects
         data["success"] = True
-        return flask.jsonify(data)
+        return data
+    except:
+        e = sys.exc_info()[1]
+        raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.route(SCENE_URL, methods=["POST"])
-def predict_scene():
+@app.post(SCENE_URL)
+async def predict_scene():
     data = {"success": False}
-    if not flask.request.method == "POST":
-        return
-
-    if flask.request.files.get("image"):
-        # Open image and get bytes and size
-        image_file = flask.request.files["image"]
-        image_bytes = image_file.read()
-        image = Image.open(io.BytesIO(image_bytes))  # A PIL image
+    if file.content_type.startswith("image/") is False:
+        raise HTTPException(
+            status_code=400, detail=f"File '{file.filename}' is not an image."
+        )
+    try:
+        contents = await file.read()
+        image = Image.open(io.BytesIO(contents))  # A PIL image
         # Format data and send to interpreter
         resized_image = image.resize(
             (scene_input_width, scene_input_height), Image.ANTIALIAS
@@ -164,7 +167,10 @@ def predict_scene():
         data["label"] = scene_labels[label_id]
         data["confidence"] = prob
         data["success"] = True
-        return flask.jsonify(data)
+        return data
+    except:
+        e = sys.exc_info()[1]
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":
@@ -199,5 +205,3 @@ if __name__ == "__main__":
     scene_input_height = scene_input_details[0]["shape"][1]
     scene_input_width = scene_input_details[0]["shape"][2]
     scene_labels = read_labels(SCENE_LABELS)
-
-    app.run(host="0.0.0.0", debug=True, port=args.port)
