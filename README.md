@@ -71,11 +71,11 @@ You can run tflite-server as a [service](https://www.raspberrypi.org/documentati
 Entering the following (adapted for your `tflite-server.py` file location and args):
 ```
 [Unit]
-Description=App exposing tensorflow lite models
+Description=Rest API exposing tensorflow lite models
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/uvicorn tflite-server:app --reload --port 5000 # check
+ExecStart=/home/pi/.local/bin/uvicorn tflite-server:app --reload --port 5000 --host 0.0.0.0
 WorkingDirectory=/home/pi/github/tensorflow-lite-rest-server
 StandardOutput=inherit
 StandardError=inherit
