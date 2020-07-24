@@ -2,7 +2,6 @@
 Expose tflite models via a rest API.
 """
 import io
-import logging
 import sys
 
 import numpy as np
@@ -13,14 +12,6 @@ from PIL import Image
 from helpers import classify_image, read_labels, set_input_tensor
 
 app = FastAPI()
-
-LOGFORMAT = "%(asctime)s %(levelname)s %(name)s : %(message)s"
-logging.basicConfig(
-    # filename="tflite-server.log", # select filename or stream
-    stream=sys.stdout,
-    level=logging.DEBUG,
-    format=LOGFORMAT,
-)
 
 MIN_CONFIDENCE = 0.1  # The absolute lowest confidence for a detection.
 
@@ -72,14 +63,10 @@ async def info():
 
 
 @app.post(FACE_DETECTION_URL)
-async def predict_face(file: UploadFile = File(...)):
+async def predict_face(image: UploadFile = File(...)):
     data = {"success": False}
-    if file.content_type.startswith("image/") is False:
-        raise HTTPException(
-            status_code=400, detail=f"File '{file.filename}' is not an image."
-        )
     try:
-        contents = await file.read()
+        contents = await image.read()
         image = Image.open(io.BytesIO(contents))  # A PIL image
         image_width = image.size[0]
         image_height = image.size[1]
@@ -92,9 +79,7 @@ async def predict_face(file: UploadFile = File(...)):
         # Process image and get predictions
         face_interpreter.invoke()
         boxes = face_interpreter.get_tensor(face_output_details[0]["index"])[0]
-        classes = face_interpreter.get_tensor(face_output_details[1]["index"])[
-            0
-        ]
+        classes = face_interpreter.get_tensor(face_output_details[1]["index"])[0]
         scores = face_interpreter.get_tensor(face_output_details[2]["index"])[0]
 
         faces = []
@@ -121,14 +106,10 @@ async def predict_face(file: UploadFile = File(...)):
 
 
 @app.post(OBJ_DETECTION_URL)
-async def predict_object(file: UploadFile = File(...)):
+async def predict_object(image: UploadFile = File(...)):
     data = {"success": False}
-    if file.content_type.startswith("image/") is False:
-        raise HTTPException(
-            status_code=400, detail=f"File '{file.filename}' is not an image."
-        )
     try:
-        contents = await file.read()
+        contents = await image.read()
         image = Image.open(io.BytesIO(contents))  # A PIL image
         image_width = image.size[0]
         image_height = image.size[1]
@@ -167,14 +148,10 @@ async def predict_object(file: UploadFile = File(...)):
 
 
 @app.post(SCENE_URL)
-async def predict_scene(file: UploadFile = File(...)):
+async def predict_scene(image: UploadFile = File(...)):
     data = {"success": False}
-    if file.content_type.startswith("image/") is False:
-        raise HTTPException(
-            status_code=400, detail=f"File '{file.filename}' is not an image."
-        )
     try:
-        contents = await file.read()
+        contents = await image.read()
         image = Image.open(io.BytesIO(contents))  # A PIL image
         # Format data and send to interpreter
         resized_image = image.resize(

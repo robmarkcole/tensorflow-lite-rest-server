@@ -20,33 +20,33 @@ If you want to create custom models, there is the easy way, and the longer but m
 ## Usage
 Start the tflite-server on port 5000 :
 ```
-(venv) $ uvicorn tflite-server:app --reload --port 5000
+(venv) $ uvicorn tflite-server:app --reload --port 5000 --host 0.0.0.0
 ```
 
 You can check that the tflite-server is running by visiting `http://ip:5000/` from any machine, where `ip` is the ip address of the host (`localhost` if querying from the same machine). The docs can be viewed at `http://localhost:5000/docs`
 
 Post an image to detecting objects via cURL:
 ```
-curl -X POST "http://localhost:5000/v1/vision/detection" -H  "accept: application/json" -H  "Content-Type: multipart/form-data" -F "file=@tests/people_car.jpg;type=image/jpeg"
+curl -X POST "http://localhost:5000/v1/vision/detection" -H  "accept: application/json" -H  "Content-Type: multipart/form-data" -F "image=@tests/people_car.jpg;type=image/jpeg"
 ```
 Which should return:
 ```
 {
   "predictions": [
     {
-      "confidence": 0.93359375, 
-      "label": "car", 
-      "x_max": 619, 
-      "x_min": 302, 
-      "y_max": 348, 
+      "confidence": 0.93359375,
+      "label": "car",
+      "x_max": 619,
+      "x_min": 302,
+      "y_max": 348,
       "y_min": 120
-    }, 
+    },
     {
-      "confidence": 0.7890625, 
-      "label": "person", 
-      "x_max": 363, 
-      "x_min": 275, 
-      "y_max": 323, 
+      "confidence": 0.7890625,
+      "label": "person",
+      "x_max": 363,
+      "x_min": 275,
+      "y_max": 323,
       "y_min": 126
     },
 .
@@ -54,16 +54,7 @@ Which should return:
 .
 'success': True}
 ```
-
-To detect faces:
-```
-curl -X POST "http://localhost:5000/v1/vision/face" -H  "accept: application/json" -H  "Content-Type: multipart/form-data" -F "file=@tests/faces.jpg;type=image/jpeg"
-```
-
-To detect the scene (dogs vs cats model):
-```
-curl -X POST "http://localhost:5000/v1/vision/scene" -H  "accept: application/json" -H  "Content-Type: multipart/form-data" -F "file=@tests/cat.jpg;type=image/jpeg"
-```
+An example request using the python requests package is in `tests/live-test.py`
 
 ## Add tflite-server as a service
 You can run tflite-server as a [service](https://www.raspberrypi.org/documentation/linux/usage/systemd.md), which means tflite-server will automatically start on RPi boot, and can be easily started & stopped. Create the service file in the appropriate location on the RPi using: ```sudo nano /etc/systemd/system/tflite-server.service```
