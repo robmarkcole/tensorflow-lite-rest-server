@@ -99,13 +99,10 @@ You can disable auto-start using:
 This API can be used as a drop in replacement for [deepstack object detection](https://github.com/robmarkcole/HASS-Deepstack-object) and [deepstack face detection](https://github.com/robmarkcole/HASS-Deepstack-face) (configuring `detect_only: True`) in Home Assistant. I also created a UI for viewing the predictions of the object detection model [here](https://github.com/robmarkcole/deepstack-ui).
 
 ## Development
-I am developing on a mac/pi4 using VScode. On mac use a venv, on pi install system wide.
+I am developing on a mac/pi4 using VScode, with black formatting & line length 120.
 
 * First time only, create venv: `python3.7 -m venv venv`
 * Activate venv: `source venv/bin/activate`
 * Install the dev requirements: `pip3 install -r requirements.txt` & `pip3 install -r requirements-dev.txt`
 * Sort requirements: `venv/bin/isort tflite-server.py`
 * Black format: `venv/bin/black tflite-server.py`
-* Run the `usage.ipynb` notebook: `venv/bin/jupyter notebook`
-
-Unfortunately appears black is not supported on pi4 yet.
