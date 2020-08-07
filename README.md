@@ -6,7 +6,7 @@ In this process we create a virtual environment (venv), then install tensorflow-
 
 All instructions for mac:
 ```
-python3.7 -m venv venv
+python3 -m venv venv
 source venv/bin/activate
 pip3 install https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp37-cp37m-macosx_10_14_x86_64.whl
 pip3 install -r requirements.txt
