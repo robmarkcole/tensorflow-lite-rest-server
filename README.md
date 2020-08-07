@@ -99,14 +99,14 @@ You can disable auto-start using:
 This API can be used as a drop in replacement for [deepstack object detection](https://github.com/robmarkcole/HASS-Deepstack-object) and [deepstack face detection](https://github.com/robmarkcole/HASS-Deepstack-face) (configuring `detect_only: True`) in Home Assistant. I also created a UI for viewing the predictions of the object detection model [here](https://github.com/robmarkcole/deepstack-ui).
 
 ## FastAPI vs Flask
-The master branch is using FastAPI whilst I am also maintaining a Flask branch. FastAPI offers a few nice features like less boilerplate code and auto generated docs. FastAPI is also widely considered to be faster than Flask, but my own testing (below) shows this not to be the case (benchmarking notebook [here](https://github.com/robmarkcole/deepstack-analytics/blob/master/speedtest.ipynb)).
+The master branch is using FastAPI whilst I am also maintaining a Flask branch. FastAPI offers a few nice features like less boilerplate code and auto generated docs. FastAPI is also widely considered to be faster than Flask.
 
 | Platform                             | Speed | Number of predictions |
 | :----------------------------------- | :---: | --------------------: |
 | Mac Pro with tflite-server (fastapi) |  2.2  |                   178 |
 | Mac Pro with tflite-server (flask)   |  2.1  |                   176 |
-| RPi4 with tflite-server (fastapi)    |  14   |                   176 |
-| RPi4 with tflite-server (flask)      | 11.8  |                   159 |
+| RPi4 with tflite-server (fastapi)    |  7.6  |                   176 |
+| RPi4 with tflite-server (flask)      |  8.9  |                   159 |
 
 ## Development
 I am developing on a mac/pi4 using VScode, with black formatting & line length 120.
