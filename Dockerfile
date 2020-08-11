@@ -1,3 +1,4 @@
+# for 32bit rpi, confirm with 'uname -m' which returns armv7l if 32 bit
 FROM python:3.7
 
 EXPOSE 5000
@@ -5,7 +6,7 @@ EXPOSE 5000
 WORKDIR /app
 
 ADD requirements.txt /app/
-RUN pip3 install https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp37-cp37m-linux_x86_64.whl
+RUN pip3 install https://dl.google.com/coral/python/tflite_runtime-2.1.0.post1-cp37-cp37m-linux_armv7l.whl
 RUN pip install -r requirements.txt
 
 ADD . /app
