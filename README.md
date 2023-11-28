@@ -65,6 +65,24 @@ Which should return:
 ```
 An example request using the python requests package is in `tests/live-test.py`
 
+## Additional models
+
+If you would like to serve additional models to the 3 that are shipped out-of-the-box with this project, you can do it adding an `additional` folder to the `models` one.
+
+You can then ask for predictions to the additonal models using this  for `detection`:
+
+```
+curl -X POST "http://localhost:5000/v1/detection/{model_name}" -H  "accept: application/json" -H  "Content-Type: multipart/form-data" -F "image=........;type=image/jpeg"
+```
+
+replacing `{model_name}` with the folder name where are store the `model.tflite` and optionally the `labels.txt` files.
+
+If you would like instead ask for a prediction to a `classification` model, the `curl` request template is:
+```
+curl -X POST "http://localhost:5000/v1/classification/{model_name}" -H  "accept: application/json" -H  "Content-Type: multipart/form-data" -F "image=........;type=image/jpeg"
+```
+
+
 ## Add tflite-server as a service
 You can run tflite-server as a [service](https://www.raspberrypi.org/documentation/linux/usage/systemd.md), which means tflite-server will automatically start on RPi boot, and can be easily started & stopped. Create the service file in the appropriate location on the RPi using: ```sudo nano /etc/systemd/system/tflite-server.service```
 
