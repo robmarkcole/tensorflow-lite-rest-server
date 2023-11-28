@@ -11,6 +11,8 @@ from PIL import Image
 
 from helpers import classify_image, read_labels, set_input_tensor
 
+from os.path import exists
+
 app = FastAPI()
 
 # Settings
@@ -25,6 +27,9 @@ OBJ_MODEL = "models/object_detection/mobilenet_ssd_v2_coco/mobilenet_ssd_v2_coco
 OBJ_LABELS = "models/object_detection/mobilenet_ssd_v2_coco/coco_labels.txt"
 SCENE_MODEL = "models/classification/dogs-vs-cats/model.tflite"
 SCENE_LABELS = "models/classification/dogs-vs-cats/labels.txt"
+ADDITIONAL_PREFIX = "models/additional/"
+ADDITIONAL_MODEL = "$$MODEL_NAME$$/model.tflite"
+ADDITIONAL_LABELS = "$$MODEL_NAME$$/labels.txt"
 
 # Setup object detection
 obj_interpreter = tflite.Interpreter(model_path=OBJ_MODEL)
@@ -52,6 +57,25 @@ scene_input_height = scene_input_details[0]["shape"][1]
 scene_input_width = scene_input_details[0]["shape"][2]
 scene_labels = read_labels(SCENE_LABELS)
 
+
+def build_interpreter(model_name):
+    model_path = ADDITIONAL_MODEL.replace("$$MODEL_NAME$$", model_name)
+    model_labels = ADDITIONAL_LABELS.replace("$$MODEL_NAME$$", model_name)
+    return inner_interpreter_builder(ADDITIONAL_PREFIX+model_path, ADDITIONAL_PREFIX+model_labels)
+
+def inner_interpreter_builder(model_path, model_labels):
+    interpreter = tflite.Interpreter(model_path=model_path)
+    interpreter.allocate_tensors()
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+    input_height = input_details[0]["shape"][1]
+    input_width = input_details[0]["shape"][2]
+    file_exists = exists(model_labels)
+    if file_exists:
+        labels = read_labels(model_labels)
+    else:
+        labels = None
+    return interpreter, input_details, output_details, input_height, input_width, labels
 
 @app.get("/")
 async def info():
@@ -159,3 +183,67 @@ async def predict_scene(image: UploadFile = File(...)):
     except:
         e = sys.exc_info()[1]
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/v1/vision/detection/{model_name}")
+async def predict_additional_vision_detection(model_name: str, image: UploadFile = File(...)):
+    try:
+        interpreter, input_details, output_details, input_height, input_width, labels = build_interpreter(model_name)
+        contents = await image.read()
+        image = Image.open(io.BytesIO(contents))
+        image_width = image.size[0]
+        image_height = image.size[1]
+
+        # Format data and send to interpreter
+        resized_image = image.resize((input_width, input_height), Image.ANTIALIAS)
+        input_data = np.expand_dims(resized_image, axis=0)
+        interpreter.set_tensor(input_details[0]["index"], input_data)
+
+        # Process image and get predictions
+        interpreter.invoke()
+        boxes = interpreter.get_tensor(output_details[0]["index"])[0]
+        classes = interpreter.get_tensor(output_details[1]["index"])[0]
+        scores = interpreter.get_tensor(output_details[2]["index"])[0]
+
+        data = {}
+        items = []
+        for i in range(len(scores)):
+            if not classes[i] == 0:  # Item
+                continue
+            single_item = {}
+            single_item["userid"] = "unknown"
+            if labels is not None:
+                single_item["label"] = labels[int(classes[i])]
+            single_item["confidence"] = float(scores[i])
+            single_item["y_min"] = int(float(boxes[i][0]) * image_height)
+            single_item["x_min"] = int(float(boxes[i][1]) * image_width)
+            single_item["y_max"] = int(float(boxes[i][2]) * image_height)
+            single_item["x_max"] = int(float(boxes[i][3]) * image_width)
+            if single_item["confidence"] < MIN_CONFIDENCE:
+                continue
+            items.append(single_item)
+
+        data["predictions"] = items
+        data["success"] = True
+        return data
+    except:
+        e = sys.exc_info()[1]
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/v1/vision/classification/{model_name}")
+async def predict_additional_vision_classification(model_name: str, image: UploadFile = File(...)):
+    try:
+        interpreter, input_details, output_details, input_height, input_width, labels = build_interpreter(model_name)
+        contents = await image.read()
+        image = Image.open(io.BytesIO(contents))
+        resized_image = image.resize((input_width, input_height), Image.ANTIALIAS)
+        results = classify_image(interpreter, image=resized_image)
+        label_id, prob = results[0]
+        data = {}
+        data["label"] = labels[label_id]
+        data["confidence"] = prob
+        data["success"] = True
+        return data
+    except:
+        e = sys.exc_info()[1]
+        raise HTTPException(status_code=500, detail=str(e))
+
